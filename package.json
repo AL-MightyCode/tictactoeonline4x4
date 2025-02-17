@@ -1,0 +1,26 @@
+{
+  "name": "live-tic-tac-toe",
+  "version": "1.0.0",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["tic-tac-toe", "multiplayer", "game"],
+  "author": "",
+  "license": "ISC",
+  "description": "Real-time multiplayer Tic Tac Toe game",
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "express": "^4.21.2",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

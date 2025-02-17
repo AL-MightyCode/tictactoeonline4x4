@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tic Tac Toe Multiplayer</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/jpeg" href="/images/icon.jpg">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        /* Global Styles */
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            font-family: 'Poppins', sans-serif; 
+            touch-action: manipulation; /* Prevent double-tap zoom */
+            -webkit-user-select: none; /* For Safari */
+        }
+
+        body { 
+            background: url('images/bk2.jpg') no-repeat center center fixed; 
+            background-size: cover;
+            color: #fff; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            text-align: center; 
+            overscroll-behavior: contain; /* Prevent pull-to-refresh */
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .container {
+                width: 95%;
+                padding: 15px;
+            }
+
+            .game-board {
+                max-width: 100%;
+                gap: 10px;
+            }
+
+            .game-cell {
+                height: 90px;
+                font-size: 2.5rem;
+            }
+
+            .social-icons {
+                top: 10px;
+                left: 10px;
+            }
+
+            .social-icon {
+                font-size: 1.5rem;
+            }
+
+            #login-screen input, 
+            #login-screen button {
+                font-size: 16px;
+                padding: 10px;
+            }
+
+            #back-to-lobby-btn {
+                font-size: 14px;
+                padding: 8px 15px;
+            }
+
+            #game-over {
+                padding: 20px;
+            }
+
+            #game-result {
+                font-size: 2rem;
+            }
+        }
+
+        /* Global Cursor Styles */
+        * {
+            cursor: default;
+        }
+
+        /* Interactive Elements */
+        a, 
+        button, 
+        input, 
+        select, 
+        textarea,
+        .game-cell,
+        .clickable,
+        [type="button"],
+        [type="submit"],
+        [role="button"] {
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+
+        /* Specific Interaction States */
+        input:focus,
+        textarea:focus {
+            cursor: text;
+        }
+
+        button:disabled,
+        .game-cell.disabled,
+        [type="button"]:disabled,
+        [type="submit"]:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        /* Prevent text selection on game elements */
+        .game-board,
+        .game-cell,
+        .game-overlay {
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+
+        /* Hover Effects */
+        button:hover,
+        .game-cell:not(.disabled):hover,
+        .clickable:hover {
+            cursor: pointer;
+        }
+
+        .social-icons {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        .social-icon {
+            color: #47cfff;
+            font-size: 2rem;
+            transition: transform 0.3s ease, color 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;  /* Remove underline */
+        }
+
+        .social-icon:hover {
+            transform: scale(1.2);
+            color: #fff;
+        }
+
+        .container { 
+            max-width: 800px; 
+            width: 90%; 
+            background: rgba(255, 255, 255, 0.1); 
+            padding: 20px; 
+            border-radius: 12px; 
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.4); 
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(0, 255, 255, 0.5);
+            position: relative; 
+        }
+
+        /* Button and Interactive Element Styles */
+        button, 
+        #join-btn,
+        #play-again-btn,
+        #back-to-lobby-btn,
+        .game-cell {
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            transition: all 0.3s ease;
+        }
+
+        button:hover, 
+        #join-btn:hover,
+        #play-again-btn:hover,
+        #back-to-lobby-btn:hover {
+            cursor: pointer;
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+        }
+
+        button:disabled,
+        #join-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .game-cell {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .game-cell:hover {
+            cursor: pointer;
+            background: rgba(71, 207, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        .game-cell.disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+            transform: none;
+        }
+
+        /* Ensure all interactive elements have clear cursor states */
+        input, 
+        select, 
+        textarea, 
+        .clickable {
+            cursor: text;
+        }
+
+        input:focus, 
+        select:focus, 
+        textarea:focus {
+            cursor: text;
+        }
+
+        a, 
+        .social-icon, 
+        [role="button"], 
+        [type="button"], 
+        [type="submit"] {
+            cursor: pointer;
+        }
+
+        /* Input and Button Styles */
+        input {
+            width: 100%; 
+            padding: 12px; 
+            border: 2px solid #47cfff; 
+            border-radius: 5px; 
+            background: rgba(51, 51, 51, 0.7); 
+            color: white; 
+            font-size: 1rem; 
+            text-align: center;
+            transition: all 0.3s ease-in-out;
+            margin-bottom: 15px;
+        }
+
+        input:focus { 
+            border-color: #fff; 
+            outline: none; 
+            transform: scale(1.05);
+            box-shadow: 0 0 10px rgba(71, 207, 255, 0.5);
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #47cfff;
+            border: none;
+            border-radius: 5px;
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+        }
+
+        #back-to-lobby-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #ff4747;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor:pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            z-index: 10;
+            width: auto;
+        }
+
+        #back-to-lobby-btn:hover {
+            background-color: #ff6b6b;
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px; 
+            max-width: 500px; 
+            margin: 20px auto;
+        }
+
+        .game-cell {
+            background: rgba(51, 51, 51, 0.7);
+            border: 2px solid #47cfff;
+            border-radius: 10px;
+            height: 120px; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3.5rem; 
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+
+        /* X and O colors */
+        .game-cell.x-cell {
+            color: #ff4747; /* Bright red for X */
+            text-shadow: 0 0 10px rgba(255, 71, 71, 0.5);
+        }
+
+        .game-cell.o-cell {
+            color: #47cfff; /* Bright blue for O */
+            text-shadow: 0 0 10px rgba(71, 207, 255, 0.5);
+        }
+
+        .game-cell:hover {
+            background: rgba(71, 207, 255, 0.2);
+        }
+
+        .game-cell.disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        /* Game Over Screen */
+        #game-over {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 30px;
+        }
+
+        #game-result {
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            color: #47cfff;
+            text-align: center;
+        }
+
+        #play-again-btn {
+            background-color: #47cfff;
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: auto;
+        }
+
+        #play-again-btn:hover {
+            background-color: #fff;
+            transform: scale(1.05);
+        }
+
+        .timer { 
+            font-size: 2rem; 
+            color: #47cfff; 
+            font-weight: bold; 
+            background: rgba(0, 255, 255, 0.2); 
+            padding: 10px 20px; 
+            border-radius: 8px; 
+            display: inline-block; 
+            margin: 10px 0;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            animation: pulse 1s infinite alternate;
+        }
+
+        .countdown-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .countdown-number {
+            font-size: 10rem;
+            color: #47cfff;
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+        }
+
+        .waiting-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            color: #47cfff;
+        }
+
+        .game-info {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            color: #47cfff;
+        }
+
+        /* Loading Overlay */
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #47cfff;
+            border-top: 5px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: #47cfff;
+            font-size: 1.2rem;
+        }
+
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="social-icons">
+        <a href="https://www.instagram.com/m_u_s_h_e_e_r_/" target="_blank" class="social-icon">
+            <i class="fab fa-instagram"></i>
+        </a>
+        <a href="https://www.facebook.com/musheer.a.12" target="_blank" class="social-icon">
+            <i class="fab fa-facebook"></i>
+        </a>
+    </div>
+
+    <div id="game-over">
+        <div id="game-result"></div>
+        <button id="play-again-btn">Back to Lobby</button>
+    </div>
+
+    <div id="loading-overlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Joining Room...</div>
+    </div>
+
+    <div class="container">
+        <button id="back-to-lobby-btn" style="display:none;">Back to Lobby</button>
+
+        <div id="login-screen">
+            <h1>Tic Tac Toe</h1>
+            <input type="text" id="player-name" placeholder="Enter Your Name">
+            <input type="text" id="room-id" placeholder="Enter Room ID">
+            <!-- Room status message will be dynamically inserted here -->
+            <button id="join-btn">Join Game</button>
+        </div>
+
+        <div id="waiting-room" style="display:none;">
+            <h2>Waiting Room</h2>
+            <div id="player-counter">0/2 Players</div>
+            <div id="player-list"></div>
+        </div>
+
+        <div id="game-screen" style="display:none;">
+            <div class="game-info">
+                <div id="current-turn">Waiting for opponent...</div>
+                <div class="timer" id="timer">30</div>
+            </div>
+
+            <div class="game-board" id="game-board">
+                <div class="game-cell" data-index="0"></div>
+                <div class="game-cell" data-index="1"></div>
+                <div class="game-cell" data-index="2"></div>
+                <div class="game-cell" data-index="3"></div>
+                <div class="game-cell" data-index="4"></div>
+                <div class="game-cell" data-index="5"></div>
+                <div class="game-cell" data-index="6"></div>
+                <div class="game-cell" data-index="7"></div>
+                <div class="game-cell" data-index="8"></div>
+                <div class="game-cell" data-index="9"></div>
+                <div class="game-cell" data-index="10"></div>
+                <div class="game-cell" data-index="11"></div>
+                <div class="game-cell" data-index="12"></div>
+                <div class="game-cell" data-index="13"></div>
+                <div class="game-cell" data-index="14"></div>
+                <div class="game-cell" data-index="15"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="countdown-overlay" class="countdown-overlay" style="display:none;">
+        <div class="countdown-number">3</div>
+    </div>
+
+    <div id="waiting-overlay" class="waiting-overlay" style="display:none;">
+        <h2>Waiting for another player...</h2>
+        <p>Please wait while we find an opponent</p>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/setup.js"></script>
+    <script src="/js/game.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const socket = io();
+
+            // DOM Elements
+            const loginScreen = document.getElementById('login-screen');
+            const waitingRoom = document.getElementById('waiting-room');
+            const gameScreen = document.getElementById('game-screen');
+            const gameOverScreen = document.getElementById('game-over');
+            const playerNameInput = document.getElementById('player-name');
+            const roomIdInput = document.getElementById('room-id');
+            const joinBtn = document.getElementById('join-btn');
+            const playerCounter = document.getElementById('player-counter');
+            const playerList = document.getElementById('player-list');
+            const gameCells = document.querySelectorAll('.game-cell');
+            const currentTurnDisplay = document.getElementById('current-turn');
+            const timerDisplay = document.getElementById('timer');
+            const countdownOverlay = document.getElementById('countdown-overlay');
+            const waitingOverlay = document.getElementById('waiting-overlay');
+            const gameResultDisplay = document.getElementById('game-result');
+            const playAgainBtn = document.getElementById('play-again-btn');
+            const backToLobbyBtn = document.getElementById('back-to-lobby-btn');
+            const loadingOverlay = document.getElementById('loading-overlay');
+
+            let gameState = {
+                playerName: null,
+                roomId: null,
+                playerSymbol: null,
+                currentPlayer: null,
+                gameBoard: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
+                gameActive: false,
+                timer: null
+            };
+
+            // Back to Lobby Button in Game Screen
+            backToLobbyBtn.addEventListener('click', () => {
+                // Emit leave game event
+                socket.emit('leave_game', {
+                    roomId: gameState.roomId,
+                    playerName: gameState.playerName
+                });
+
+                // Reset to login screen
+                backToLobbyBtn.style.display = 'none';
+                gameScreen.style.display = 'none';
+                loginScreen.style.display = 'block';
+                
+                // Reset game state
+                gameState = {
+                    playerName: null,
+                    roomId: null,
+                    playerSymbol: null,
+                    currentPlayer: null,
+                    gameBoard: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
+                    gameActive: false,
+                    timer: null
+                };
+
+                // Clear game board
+                gameCells.forEach(cell => {
+                    cell.textContent = '';
+                    cell.classList.remove('x-cell', 'o-cell', 'disabled');
+                });
+
+                // Stop timer
+                clearTimer();
+            });
+
+            // Play Again Button (now returns to lobby)
+            playAgainBtn.addEventListener('click', () => {
+                // Reset to login screen
+                gameOverScreen.style.display = 'none';
+                loginScreen.style.display = 'block';
+                gameScreen.style.display = 'none';
+                backToLobbyBtn.style.display = 'none';
+
+                // Reset game state
+                gameState = {
+                    playerName: null,
+                    roomId: null,
+                    playerSymbol: null,
+                    currentPlayer: null,
+                    gameBoard: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
+                    gameActive: false,
+                    timer: null
+                };
+
+                // Clear game board
+                gameCells.forEach(cell => {
+                    cell.textContent = '';
+                    cell.classList.remove('x-cell', 'o-cell', 'disabled');
+                });
+            });
+
+            // Room Status Check Before Joining
+            roomIdInput.addEventListener('input', () => {
+                const roomId = roomIdInput.value.trim();
+                if (roomId) {
+                    // Check room status before joining
+                    socket.emit('check_room', { roomId });
+                }
+            });
+
+            // Listen for room status response
+            socket.on('room_status_response', (data) => {
+                const roomStatusMessage = document.getElementById('room-status-message');
+                
+                if (!roomStatusMessage) {
+                    // Create room status message element if it doesn't exist
+                    const statusDiv = document.createElement('div');
+                    statusDiv.id = 'room-status-message';
+                    statusDiv.style.color = data.available ? '#47cfff' : '#ff4747';
+                    statusDiv.style.marginBottom = '10px';
+                    roomIdInput.parentNode.insertBefore(statusDiv, roomIdInput.nextSibling);
+                }
+
+                const roomStatusElement = document.getElementById('room-status-message');
+                roomStatusElement.textContent = `${data.message} (${data.currentPlayers}/${data.maxPlayers} players)`;
+                roomStatusElement.style.color = data.available ? '#47cfff' : '#ff4747';
+
+                // Disable join button if room is not available
+                joinBtn.disabled = !data.available;
+            });
+
+            // Join Game
+            joinBtn.addEventListener('click', () => {
+                const playerName = playerNameInput.value.trim();
+                const roomId = roomIdInput.value.trim();
+
+                if (!playerName || !roomId) {
+                    alert('Please enter both player name and room ID');
+                    return;
+                }
+
+                // Show loading overlay
+                loadingOverlay.style.display = 'flex';
+
+                // Emit join room event
+                socket.emit('join_room', { playerName, roomId });
+            });
+
+            // Join Confirmation Listener
+            socket.on('join_confirmation', (data) => {
+                // Hide loading overlay
+                loadingOverlay.style.display = 'none';
+
+                // Hide login screen
+                loginScreen.style.display = 'none';
+
+                // Show waiting room
+                waitingRoom.style.display = 'block';
+
+                // Update waiting room details
+                playerCounter.textContent = '1/2 Players';
+                playerList.innerHTML = `
+                    <div>Player 1: ${data.playerName} (${data.symbol})</div>
+                `;
+            });
+
+            // Modify room status handling
+            socket.on('room_status', (data) => {
+                // Update player counter
+                playerCounter.textContent = `${data.currentPlayers}/${data.maxPlayers} Players`;
+                
+                // Clear and update player list
+                playerList.innerHTML = '';
+                data.players.forEach(player => {
+                    const playerDiv = document.createElement('div');
+                    playerDiv.textContent = `Player ${player.playerNumber}: ${player.name} (${player.symbol})`;
+                    playerList.appendChild(playerDiv);
+                });
+            });
+
+            // Error Handling
+            socket.on('join_error', (data) => {
+                // Hide loading overlay
+                loadingOverlay.style.display = 'none';
+
+                // Show error message
+                alert(data.message);
+            });
+
+            // Game End Handling
+            socket.on('move_made', (data) => {
+                if (data.winner || data.isDraw) {
+                    // Emit game end event to reset room state
+                    socket.emit('game_end', { roomId: gameState.roomId });
+                }
+            });
+
+            // Socket Event Listeners
+            socket.on('room_full', (data) => {
+                // Hide waiting screens
+                waitingRoom.style.display = 'none';
+                waitingOverlay.style.display = 'none';
+                loginScreen.style.display = 'none';
+
+                // Start countdown
+                startCountdown(() => {
+                    // Show game screen
+                    gameScreen.style.display = 'block';
+
+                    // Set game state
+                    gameState.playerName = playerNameInput.value;
+                    gameState.roomId = data.roomId;
+                    gameState.playerSymbol = data.players.find(p => p.name === gameState.playerName).symbol;
+                    gameState.currentPlayer = data.currentPlayer;
+
+                    // Update turn display
+                    updateTurnDisplay();
+
+                    // Start timer
+                    startTimer();
+
+                    // Enable/disable game cells based on current player
+                    updateGameCells();
+                });
+            });
+
+            // Game cell click handler
+            gameCells.forEach(cell => {
+                cell.addEventListener('click', () => {
+                    const index = cell.getAttribute('data-index');
+                    
+                    // Only allow move if it's player's turn and cell is empty
+                    if (gameState.currentPlayer === gameState.playerSymbol && gameState.gameBoard[index] === '') {
+                        socket.emit('make_move', {
+                            roomId: gameState.roomId,
+                            playerName: gameState.playerName,
+                            position: index,
+                            symbol: gameState.playerSymbol
+                        });
+                    }
+                });
+            });
+
+            socket.on('move_made', (data) => {
+                // Update game board
+                gameState.gameBoard[data.position] = data.symbol;
+                
+                // Update game cells
+                updateGameCells();
+
+                // Check for game over
+                if (data.winner || data.isDraw) {
+                    // Show game over screen
+                    gameScreen.style.display = 'none';
+                    gameOverScreen.style.display = 'flex';
+
+                    // Display result
+                    if (data.winner) {
+                        gameResultDisplay.textContent = data.winner === gameState.playerName 
+                            ? 'You Win!' 
+                            : `${data.winner} Wins!`;
+                    } else {
+                        gameResultDisplay.textContent = 'Draw!';
+                    }
+
+                    // Stop timer
+                    clearTimer();
+                } else {
+                    // Update current player
+                    gameState.currentPlayer = data.currentPlayer;
+
+                    // Update turn display
+                    updateTurnDisplay();
+
+                    // Restart timer
+                    startTimer();
+                }
+            });
+
+            socket.on('game_over', (data) => {
+                // Stop timer
+                clearTimer();
+
+                // Show game over screen
+                gameScreen.style.display = 'none';
+                gameOverScreen.style.display = 'flex';
+
+                // Display result
+                if (data.winner) {
+                    gameResultDisplay.textContent = data.winner === gameState.playerName 
+                        ? 'You Win!' 
+                        : `${data.winner} Wins!`;
+                } else {
+                    gameResultDisplay.textContent = 'Draw!';
+                }
+            });
+
+            socket.on('player_disconnected', (data) => {
+                // If other player disconnects, declare current player as winner
+                gameScreen.style.display = 'none';
+                gameOverScreen.style.display = 'flex';
+                gameResultDisplay.textContent = 'Other Player Left. You Win!';
+                
+                // Stop timer
+                clearTimer();
+
+                // Show back to lobby button
+                backToLobbyBtn.style.display = 'block';
+            });
+
+            // Countdown function
+            function startCountdown(callback) {
+                countdownOverlay.style.display = 'flex';
+                const countdownNumber = countdownOverlay.querySelector('.countdown-number');
+                let count = 3;
+
+                const countdownInterval = setInterval(() => {
+                    countdownNumber.textContent = count;
+                    count--;
+
+                    if (count < 0) {
+                        clearInterval(countdownInterval);
+                        countdownOverlay.style.display = 'none';
+                        callback();
+                    }
+                }, 1000);
+            }
+
+            // Timer function
+            function startTimer() {
+                // Clear existing timer
+                clearTimer();
+
+                let timeLeft = 30;
+                timerDisplay.textContent = timeLeft;
+
+                gameState.timer = setInterval(() => {
+                    timeLeft--;
+                    timerDisplay.textContent = timeLeft;
+
+                    if (timeLeft <= 0) {
+                        clearTimer();
+                        // Automatically make a random move
+                        const emptyCell = gameState.gameBoard.findIndex(cell => cell === '');
+                        if (emptyCell !== -1) {
+                            socket.emit('make_move', {
+                                roomId: gameState.roomId,
+                                playerName: gameState.playerName,
+                                position: emptyCell,
+                                symbol: gameState.playerSymbol
+                            });
+                        }
+                    }
+                }, 1000);
+            }
+
+            function clearTimer() {
+                if (gameState.timer) {
+                    clearInterval(gameState.timer);
+                }
+            }
+
+            function updateTurnDisplay() {
+                currentTurnDisplay.textContent = gameState.currentPlayer === gameState.playerSymbol 
+                    ? 'Your Turn' 
+                    : 'Opponent\'s Turn';
+            }
+
+            function checkWinner(board) {
+                // Horizontal Wins
+                for (let row = 0; row < 4; row++) {
+                    const rowStart = row * 4;
+                    if (board[rowStart] && 
+                        board[rowStart] === board[rowStart + 1] && 
+                        board[rowStart] === board[rowStart + 2] && 
+                        board[rowStart] === board[rowStart + 3]) {
+                        return board[rowStart];
+                    }
+                }
+
+                // Vertical Wins
+                for (let col = 0; col < 4; col++) {
+                    if (board[col] && 
+                        board[col] === board[col + 4] && 
+                        board[col] === board[col + 8] && 
+                        board[col] === board[col + 12]) {
+                        return board[col];
+                    }
+                }
+
+                // Diagonal Wins (Top-left to bottom-right)
+                if (board[0] && 
+                    board[0] === board[5] && 
+                    board[0] === board[10] && 
+                    board[0] === board[15]) {
+                    return board[0];
+                }
+
+                // Diagonal Wins (Top-right to bottom-left)
+                if (board[3] && 
+                    board[3] === board[6] && 
+                    board[3] === board[9] && 
+                    board[3] === board[12]) {
+                    return board[3];
+                }
+
+                // Check for Draw
+                if (!board.includes('')) {
+                    return 'draw';
+                }
+
+                return null;
+            }
+
+            function updateGameCells() {
+                gameCells.forEach((cell, index) => {
+                    const symbol = gameState.gameBoard[index];
+                    cell.textContent = symbol;
+
+                    // Add color classes
+                    if (symbol === 'X') {
+                        cell.classList.add('x-cell');
+                        cell.classList.remove('o-cell');
+                    } else if (symbol === 'O') {
+                        cell.classList.add('o-cell');
+                        cell.classList.remove('x-cell');
+                    } else {
+                        cell.classList.remove('x-cell', 'o-cell');
+                    }
+
+                    // Disable cells if not player's turn or cell is occupied
+                    if (gameState.currentPlayer !== gameState.playerSymbol || gameState.gameBoard[index] !== '') {
+                        cell.classList.add('disabled');
+                    } else {
+                        cell.classList.remove('disabled');
+                    }
+                });
+            }
+
+            // Disable join button if inputs are empty
+            function checkJoinButtonState() {
+                const playerName = playerNameInput.value.trim();
+                const roomId = roomIdInput.value.trim();
+                
+                joinBtn.disabled = !(playerName && roomId);
+            }
+
+            // Add event listeners to inputs
+            playerNameInput.addEventListener('input', checkJoinButtonState);
+            roomIdInput.addEventListener('input', checkJoinButtonState);
+
+            // Initial check
+            checkJoinButtonState();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: live-tic-tac-toe
+    runtime: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: PORT
+        value: 10000
+    branch: main
+    healthCheckPath: /
+    autoDeploy: true
+    plan: free
